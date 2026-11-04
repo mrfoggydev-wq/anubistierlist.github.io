@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Anubis Tier List | Мобильный тир-лист</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c1f 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', 'Poppins', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            padding: 12px;
+            min-height: 100vh;
+            touch-action: pan-y; /* вертикальный скролл, горизонтальный не мешает */
+        }
+
+        .app-wrapper {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* шапка */
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            padding: 10px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .title-glow {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFD966, #FFA559);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .anubis-credit {
+            font-size: 0.7rem;
+            color: #aaa;
+            background: #00000055;
+            padding: 4px 10px;
+            border-radius: 40px;
+        }
+        .anubis-credit span {
+            color: #ffb347;
+        }
+
+        /* тулбар */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            background: #0f0e1ccc;
+            border-radius: 28px;
+            padding: 10px 15px;
+        }
+        .name-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 2;
+            min-width: 180px;
+        }
+        .name-section label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #ddd;
+        }
+        #tierlistName {
+            background: #2a2538;
+            border: 1px solid #ffa55966;
+            padding: 8px 12px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 500;
+            flex: 1;
+            font-size: 0.8rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #2d2a44;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7rem;
+            box-shadow: 0 2px 5px black;
+            touch-action: manipulation;
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: #e67e22;
+        }
+        .upload-btn {
+            background: #4a3b6e;
+        }
+
+        /* библиотека картинок (горизонтальный скролл для телефона) */
+        .library-panel {
+            background: #0e0c1aee;
+            border-radius: 24px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ffa55933;
+        }
+        .library-title {
+            font-size: 0.75rem;
+            margin-bottom: 10px;
+            color: #ffcd94;
+        }
+        .library-grid {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 6px 2px 10px 2px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        .lib-card {
+            background: #1e1b2c;
+            border-radius: 18px;
+            padding: 8px;
+            cursor: grab;
+            touch-action: none;
+            border: 1px solid #ffa55988;
+            width: 80px;
+            flex-shrink: 0;
+            text-align: center;
+            transition: 0.05s linear;
+        }
+        .lib-card:active {
+            cursor: grabbing;
+        }
+        .lib-card img {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            background: white;
+            border-radius: 12px;
+            padding: 4px;
+            pointer-events: none;
+        }
+        .lib-name {
+            font-size: 9px;
+            display: block;
+            color: #ccc;
+            margin-top: 5px;
+            word-break: break-word;
+            background: #2a253f;
+            border-radius: 20px;
+            padding: 2px 5px;
+        }
+
+        /* ТИР ЛИСТ - обычный вид, адаптивный */
+        .tierlist-container {
+            background: #01000880;
+            border-radius: 28px;
+            padding: 8px;
+            margin-bottom: 20px;
+        }
+        .tier-row {
+            display: flex;
+            margin-bottom: 10px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        /* на телефоне уровень слева, контент справа (как обычно) */
+        @media (max-width: 550px) {
+            .tier-label {
+                width: 70px !important;
+                font-size: 1.3rem !important;
+                padding: 8px 4px !important;
+            }
+            .tier-item {
+                width: 68px !important;
+                padding: 5px 3px !important;
+            }
+            .tier-item img {
+                width: 50px !important;
+                height: 50px !important;
+            }
+            .item-name {
+                font-size: 8px !important;
+            }
+            .delete-item-btn {
+                width: 18px !important;
+                height: 18px !important;
+                font-size: 10px !important;
+                top: -6px !important;
+                right: -6px !important;
+            }
+        }
+        .tier-label {
+            width: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.6rem;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+            color: white;
+            cursor: pointer;
+            padding: 10px 5px;
+        }
+        /* цвета */
+        .tier-red .tier-label { background: linear-gradient(145deg, #e74c3c, #b03a2e); }
+        .tier-orange .tier-label { background: linear-gradient(145deg, #f39c12, #d35400); }
+        .tier-yellow .tier-label { background: linear-gradient(145deg, #f9e45b, #e67e22); color: #2c3e50; text-shadow: none; }
+        .tier-green .tier-label { background: linear-gradient(145deg, #27ae60, #1e8449); }
+        .tier-blue .tier-label { background: linear-gradient(145deg, #2980b9, #1f618d); }
+
+        .tier-items {
+            flex: 1;
+            background: #11101cd9;
+            min-height: 85px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            border-left: 2px solid rgba(255,165,89,0.4);
+            transition: 0.1s;
+        }
+        .tier-item {
+            background: #2c263f;
+            border-radius: 18px;
+            width: 78px;
+            padding: 6px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: grab;
+            position: relative;
+            transition: 0.05s linear;
+            box-shadow: 0 4px 8px black;
+            border: 1px solid #ffb34777;
+            touch-action: none;
+        }
+        .tier-item:active {
+            cursor: grabbing;
+        }
+        .tier-item img {
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+            background: #fef3e0;
+            border-radius: 14px;
+            padding: 4px;
+            pointer-events: none;
+        }
+        .item-name {
+            font-size: 9px;
+            font-weight: 600;
+            text-align: center;
+            color: #ffecb3;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: #00000066;
+            padding: 2px 5px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .delete-item-btn {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            background: #e74c3c;
+            border-radius: 30px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 1px 3px black;
+            z-index: 10;
+            touch-action: manipulation;
+        }
+        .drag-over {
+            background: #2a2348 !important;
+            border: 2px dashed #ffb347;
+        }
+
+        /* кнопки внизу */
+        .bottom-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 15px 0 8px;
+            flex-wrap: wrap;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 10px;
+            opacity: 0.7;
+            padding-bottom: 20px;
+        }
+        /* режим скриншота - прячем все лишнее */
+        .screenshot-mode .delete-item-btn,
+        .screenshot-mode .add-tier-btn,
+        .screenshot-mode .new-tierlist-btn,
+        .screenshot-mode .bottom-buttons,
+        .screenshot-mode .library-panel,
+        .screenshot-mode .toolbar,
+        .screenshot-mode .header-area {
+            display: none !important;
+        }
+        .screenshot-mode .tierlist-container {
+            background: #010008;
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <div class="header-area">
+        <div class="title-glow">⚡ ANUBIS TIER LIST ⚡</div>
+        <div class="anubis-credit"><span>✨ создано с помощью AnubisTierList ✨</span></div>
+    </div>
+
+    <div class="toolbar">
+        <div class="name-section">
+            <label>📛 Название:</label>
+            <input type="text" id="tierlistName" value="Мой топ рейтинг">
+        </div>
+        <div class="btn-group">
+            <button id="downloadPngBtn" class="btn-primary">📸 PNG</button>
+            <label for="uploadImageInput" class="upload-btn" style="background:#5a4a7a; padding:7px 14px; border-radius:40px; cursor:pointer;">🖼️ +</label>
+            <input type="file" id="uploadImageInput" accept="image/*" multiple style="display:none">
+            <button id="resetDefaultBtn">🔄</button>
+        </div>
+    </div>
+
+    <div class="library-panel">
+        <div class="library-title">📦 Твои картинки (зажми и тащи пальцем)</div>
+        <div id="imageLibraryGrid" class="library-grid"></div>
+    </div>
+
+    <div id="tierListRoot" class="tierlist-container">
+        <div id="tiersContainer"></div>
+        <div class="bottom-buttons">
+            <button id="addNewTierBtn" class="add-tier-btn">➕ Добавить уровень</button>
+            <button id="createNewTierlistBtn" class="new-tierlist-btn">✨ Новый тир-лист</button>
+        </div>
+    </div>
+    <footer>💡 На телефоне: зажми картинку → перетащи на уровень. Клик по названию — переименовать.</footer>
+</div>
+
+<script>
+    // ---------- ДАННЫЕ ----------
+    const colorClasses = ["tier-red", "tier-orange", "tier-yellow", "tier-green", "tier-blue"];
+    let tiersData = [
+        { id: "tier_0", label: "S", colorIndex: 0, items: [] },
+        { id: "tier_1", label: "A", colorIndex: 1, items: [] },
+        { id: "tier_2", label: "B", colorIndex: 2, items: [] },
+        { id: "tier_3", label: "C", colorIndex: 3, items: [] },
+        { id: "tier_4", label: "D", colorIndex: 4, items: [] }
+    ];
+    let imageLibrary = [];
+
+    // Drag & Drop переменные (универсальные)
+    let dragContext = null; // { type, data, sourceTierId?, itemId? }
+    let ghostDiv = null;
+    let activeDropTarget = null;
+
+    const tiersContainer = document.getElementById("tiersContainer");
+    const libraryGrid = document.getElementById("imageLibraryGrid");
+    const tierlistNameInput = document.getElementById("tierlistName");
+    const uploadImageInput = document.getElementById("uploadImageInput");
+    const downloadPngBtn = document.getElementById("downloadPngBtn");
+    const resetDefaultBtn = document.getElementById("resetDefaultBtn");
+    const addNewTierBtn = document.getElementById("addNewTierBtn");
+    const createNewTierlistBtn = document.getElementById("createNewTierlistBtn");
+
+    function genId() { return Date.now() + "-" + Math.random().toString(36).substr(2, 8); }
+
+    function renderFull() {
+        renderTiers();
+        renderLibrary();
+    }
+
+    function renderTiers() {
+        tiersContainer.innerHTML = "";
+        tiersData.forEach((tier) => {
+            const rowDiv = document.createElement("div");
+            rowDiv.className = `tier-row ${colorClasses[tier.colorIndex] || "tier-red"}`;
+            rowDiv.setAttribute("data-tier-id", tier.id);
+
+            const labelDiv = document.createElement("div");
+            labelDiv.className = "tier-label";
+            labelDiv.innerText = tier.label;
+            labelDiv.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const newLabel = prompt("Название уровня:", tier.label);
+                if (newLabel && newLabel.trim()) tier.label = newLabel.trim().slice(0, 6);
+                renderFull();
+            });
+
+            const itemsDiv = document.createElement("div");
+            itemsDiv.className = "tier-items";
+            itemsDiv.setAttribute("data-tier-id", tier.id);
+            
+            // обработчики дропа для мыши
+            itemsDiv.addEventListener("dragover", (e) => e.preventDefault());
+            itemsDiv.addEventListener("dragenter", (e) => { e.preventDefault(); itemsDiv.classList.add("drag-over"); });
+            itemsDiv.addEventListener("dragleave", () => itemsDiv.classList.remove("drag-over"));
+            itemsDiv.addEventListener("drop", (e) => {
+                e.preventDefault();
+                itemsDiv.classList.remove("drag-over");
+                if (dragContext) applyDrop(tier.id);
+            });
+            
+            // для touch — эмуляция через глобальные обработчики
+            itemsDiv.addEventListener("touchmove", (e) => handleTouchMoveOver(e, tier.id));
+            itemsDiv.addEventListener("touchend", (e) => handleTouchDropOnTier(e, tier.id));
+
+            tier.items.forEach(item => {
+                const itemCard = document.createElement("div");
+                itemCard.className = "tier-item";
+                itemCard.setAttribute("data-item-id", item.id);
+                itemCard.setAttribute("data-parent-tier", tier.id);
+                itemCard.setAttribute("draggable", "true");
+                
+                // мышь
+                itemCard.addEventListener("dragstart", (e) => {
+                    dragContext = { type: 'tier', sourceTierId: tier.id, itemId: item.id, item: item };
+                    e.dataTransfer.setData("text/plain", item.id);
+                });
+                itemCard.addEventListener("dragend", () => { setTimeout(() => { if (dragContext?.type !== 'touch') dragContext = null; }, 100); });
+                
+                // touch
+                itemCard.addEventListener("touchstart", (e) => initTouchDrag(e, { type: 'tier', sourceTierId: tier.id, itemId: item.id, item: item }));
+                
+                const imgEl = document.createElement("img");
+                imgEl.src = item.imageUrl;
+                const nameSpan = document.createElement("span");
+                nameSpan.className = "item-name";
+                nameSpan.innerText = item.name.length > 14 ? item.name.slice(0,12)+".." : item.name;
+                nameSpan.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const newName = prompt("Новое название:", item.name);
+                    if (newName && newName.trim()) { item.name = newName.trim().slice(0, 25); renderFull(); }
+                });
+                const delBtn = document.createElement("div");
+                delBtn.className = "delete-item-btn";
+                delBtn.innerText = "✖";
+                delBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const idx = tier.items.findIndex(i => i.id === item.id);
+                    if (idx !== -1) tier.items.splice(idx,1);
+                    renderFull();
+                });
+                itemCard.appendChild(imgEl);
+                itemCard.appendChild(nameSpan);
+                itemCard.appendChild(delBtn);
+                itemsDiv.appendChild(itemCard);
+            });
+            rowDiv.appendChild(labelDiv);
+            rowDiv.appendChild(itemsDiv);
+            tiersContainer.appendChild(rowDiv);
+        });
+    }
+
+    function renderLibrary() {
+        libraryGrid.innerHTML = "";
+        if (imageLibrary.length === 0) {
+            libraryGrid.innerHTML = "<div style='padding:12px; opacity:0.7; white-space:nowrap'>📭 Загрузи картинки</div>";
+            return;
+        }
+        imageLibrary.forEach(img => {
+            const card = document.createElement("div");
+            card.className = "lib-card";
+            card.setAttribute("data-lib-id", img.id);
+            card.setAttribute("draggable", "true");
+            card.addEventListener("dragstart", (e) => {
+                dragContext = { type: 'library', imageData: img };
+                e.dataTransfer.setData("text/plain", img.id);
+            });
+            card.addEventListener("dragend", () => { setTimeout(() => { if (dragContext?.type !== 'touch') dragContext = null; }, 100); });
+            card.addEventListener("touchstart", (e) => initTouchDrag(e, { type: 'library', imageData: img }));
+            
+            const thumb = document.createElement("img");
+            thumb.src = img.dataURL;
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "lib-name";
+            nameSpan.innerText = img.name.length > 14 ? img.name.slice(0,12)+".." : img.name;
+            nameSpan.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const newName = prompt("Переименовать картинку:", img.name);
+                if (newName && newName.trim()) { img.name = newName.trim().slice(0, 25); renderFull(); }
+            });
+            card.appendChild(thumb);
+            card.appendChild(nameSpan);
+            libraryGrid.appendChild(card);
+        });
+    }
+
+    // Применить дроп
+    function applyDrop(targetTierId) {
+        if (!dragContext) return;
+        const targetTier = tiersData.find(t => t.id === targetTierId);
+        if (!targetTier) return;
+        
+        if (dragContext.type === 'tier') {
+            const sourceTier = tiersData.find(t => t.id === dragContext.sourceTierId);
+            if (sourceTier && sourceTier.id !== targetTier.id) {
+                const itemIdx = sourceTier.items.findIndex(i => i.id === dragContext.itemId);
+                if (itemIdx !== -1) {
+                    const moved = sourceTier.items.splice(itemIdx, 1)[0];
+                    targetTier.items.push(moved);
+                    renderFull();
+                }
+            }
+        } 
+        else if (dragContext.type === 'library') {
+            const newItem = {
+                id: genId(),
+                imageUrl: dragContext.imageData.dataURL,
+                name: dragContext.imageData.name
+            };
+            targetTier.items.push(newItem);
+            renderFull();
+        }
+        dragContext = null;
+        if (activeDropTarget) activeDropTarget.classList.remove("drag-over");
+        activeDropTarget = null;
+    }
+
+    // ---------- ПОЛНОЦЕННЫЙ TOUCH DRAG & DROP ДЛЯ ТЕЛЕФОНА ----------
+    let touchActive = false;
+    let touchContext = null;
+    let startX = 0, startY = 0;
+    let currentTargetTierId = null;
+    let touchGhost = null;
+    
+    function initTouchDrag(e, context) {
+        e.preventDefault();
+        if (touchActive) return;
+        touchActive = true;
+        touchContext = context;
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        
+        // создаем призрак
+        if (touchGhost) touchGhost.remove();
+        touchGhost = document.createElement("div");
+        touchGhost.style.position = "fixed";
+        touchGhost.style.zIndex = "9999";
+        touchGhost.style.pointerEvents = "none";
+        touchGhost.style.opacity = "0.8";
+        touchGhost.style.transform = "scale(0.9)";
+        touchGhost.style.background = "#2c263f";
+        touchGhost.style.borderRadius = "18px";
+        touchGhost.style.padding = "6px";
+        touchGhost.style.border = "2px solid #ffb347";
+        touchGhost.style.width = "70px";
+        touchGhost.style.textAlign = "center";
+        touchGhost.style.boxShadow = "0 4px 12px black";
+        
+        let imgSrc = "";
+        if (context.type === 'library') imgSrc = context.imageData.dataURL;
+        else if (context.type === 'tier') imgSrc = context.item.imageUrl;
+        
+        const imgGhost = document.createElement("img");
+        imgGhost.src = imgSrc;
+        imgGhost.style.width = "55px";
+        imgGhost.style.height = "55px";
+        imgGhost.style.borderRadius = "12px";
+        imgGhost.style.background = "white";
+        imgGhost.style.padding = "4px";
+        touchGhost.appendChild(imgGhost);
+        document.body.appendChild(touchGhost);
+        updateGhostPosition(startX, startY);
+        
+        document.addEventListener("touchmove", onTouchMoveGlobal);
+        document.addEventListener("touchend", onTouchEndGlobal);
+    }
+    
+    function updateGhostPosition(x, y) {
+        if (touchGhost) {
+            touchGhost.style.left = (x - 35) + "px";
+            touchGhost.style.top = (y - 35) + "px";
+        }
+    }
+    
+    function onTouchMoveGlobal(e) {
+        if (!touchActive) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        updateGhostPosition(touch.clientX, touch.clientY);
+        
+        // поиск уровня под пальцем
+        const elemUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+        const tierRow = elemUnder?.closest(".tier-row");
+        let newTargetId = null;
+        if (tierRow) {
+            const itemsDiv = tierRow.querySelector(".tier-items");
+            if (itemsDiv) newTargetId = itemsDiv.getAttribute("data-tier-id");
+        }
+        if (newTargetId !== currentTargetTierId) {
+            if (activeDropTarget) activeDropTarget.classList.remove("drag-over");
+            currentTargetTierId = newTargetId;
+            if (currentTargetTierId) {
+                const newTargetDiv = document.querySelector(`.tier-items[data-tier-id="${currentTargetTierId}"]`);
+                if (newTargetDiv) {
+                    activeDropTarget = newTargetDiv;
+                    activeDropTarget.classList.add("drag-over");
+                }
+            } else {
+                activeDropTarget = null;
+            }
+        }
+    }
+    
+    function onTouchEndGlobal(e) {
+        if (!touchActive) return;
+        e.preventDefault();
+        if (touchGhost) touchGhost.remove();
+        touchGhost = null;
+        
+        if (currentTargetTierId && touchContext) {
+            const targetTier = tiersData.find(t => t.id === currentTargetTierId);
+            if (targetTier) {
+                if (touchContext.type === 'library') {
+                    const newItem = {
+                        id: genId(),
+                        imageUrl: touchContext.imageData.dataURL,
+                        name: touchContext.imageData.name
+                    };
+                    targetTier.items.push(newItem);
+                    renderFull();
+                } 
+                else if (touchContext.type === 'tier') {
+                    const sourceTier = tiersData.find(t => t.id === touchContext.sourceTierId);
+                    if (sourceTier && sourceTier.id !== targetTier.id) {
+                        const idx = sourceTier.items.findIndex(i => i.id === touchContext.itemId);
+                        if (idx !== -1) {
+                            const moved = sourceTier.items.splice(idx, 1)[0];
+                            targetTier.items.push(moved);
+                            renderFull();
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (activeDropTarget) activeDropTarget.classList.remove("drag-over");
+        touchActive = false;
+        touchContext = null;
+        currentTargetTierId = null;
+        activeDropTarget = null;
+        document.removeEventListener("touchmove", onTouchMoveGlobal);
+        document.removeEventListener("touchend", onTouchEndGlobal);
+    }
+    
+    function handleTouchMoveOver(e, tierId) {
+        if (!touchActive) return;
+        e.preventDefault();
+    }
+    function handleTouchDropOnTier(e, tierId) {
+        // уже обработано в глобальном onTouchEndGlobal
+    }
+    
+    // Загрузка картинок
+    function addImagesToLibrary(files) {
+        if (!files.length) return;
+        Array.from(files).forEach(file => {
+            if (!file.type.startsWith("image/")) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                let baseName = file.name.replace(/\.[^/.]+$/, "");
+                if (baseName.length > 20) baseName = baseName.slice(0,17)+"...";
+                imageLibrary.push({ id: genId(), name: baseName, dataURL: ev.target.result });
+                renderFull();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    
+    // Экспорт PNG
+    async function exportAsPNG() {
+        const tierRoot = document.getElementById("tierListRoot");
+        if (!tierRoot) return;
+        const originalTitle = tierlistNameInput.value;
+        const watermark = document.createElement("div");
+        watermark.style.textAlign = "center";
+        watermark.style.margin = "10px auto";
+        watermark.style.fontSize = "11px";
+        watermark.style.fontWeight = "bold";
+        watermark.style.color = "#ffb347";
+        watermark.style.background = "#000000aa";
+        watermark.style.padding = "5px 12px";
+        watermark.style.borderRadius = "30px";
+        watermark.style.width = "fit-content";
+        watermark.innerText = `✨ создано с помощью AnubisTierList • ${originalTitle} ✨`;
+        tierRoot.parentNode.insertBefore(watermark, tierRoot);
+        document.body.classList.add("screenshot-mode");
+        await new Promise(r => setTimeout(r, 50));
+        try {
+            const canvas = await html2canvas(tierRoot, { scale: 2.5, backgroundColor: '#0f0c1f', useCORS: true });
+            const link = document.createElement("a");
+            link.download = `Anubis_TierList_${originalTitle.replace(/[^a-z0-9]/gi, '_')}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        } catch(err) { alert("Ошибка: " + err); }
+        finally {
+            document.body.classList.remove("screenshot-mode");
+            if (watermark.parentNode) watermark.remove();
+        }
+    }
+    
+    function resetToExample() {
+        const demo = [
+            { name: "🔥 Феникс", dataURL: "https://placehold.co/120x120/e67e22/ffffff?text=Phoenix" },
+            { name: "⚡ Молния", dataURL: "https://placehold.co/120x120/f1c40f/2c3e50?text=Thunder" },
+            { name: "💎 Алмаз", dataURL: "https://placehold.co/120x120/3498db/fff?text=Diamond" },
+            { name: "🌿 Природа", dataURL: "https://placehold.co/120x120/2ecc71/fff?text=Nature" },
+            { name: "👑 Король", dataURL: "https://placehold.co/120x120/e74c3c/fff?text=King" }
+        ];
+        imageLibrary = demo.map(img => ({ id: genId(), name: img.name, dataURL: img.dataURL }));
+        tiersData = [
+            { id: genId(), label: "S", colorIndex: 0, items: [{ id: genId(), imageUrl: demo[0].dataURL, name: demo[0].name }] },
+            { id: genId(), label: "A", colorIndex: 1, items: [{ id: genId(), imageUrl: demo[1].dataURL, name: demo[1].name }] },
+            { id: genId(), label: "B", colorIndex: 2, items: [{ id: genId(), imageUrl: demo[2].dataURL, name: demo[2].name }] },
+            { id: genId(), label: "C", colorIndex: 3, items: [{ id: genId(), imageUrl: demo[3].dataURL, name: demo[3].name }] },
+            { id: genId(), label: "D", colorIndex: 4, items: [{ id: genId(), imageUrl: demo[4].dataURL, name: demo[4].name }] }
+        ];
+        tierlistNameInput.value = "Мой тир-лист";
+        renderFull();
+    }
+    
+    function addNewTier() {
+        let newLabel = prompt("Название уровня (S, A, B...):", "Новый");
+        if (!newLabel) return;
+        newLabel = newLabel.slice(0,6);
+        tiersData.push({ id: genId(), label: newLabel, colorIndex: tiersData.length % colorClasses.length, items: [] });
+        renderFull();
+    }
+    
+    function createNewTierlist() {
+        if (confirm("Создать новый тир-лист? Картинки останутся.")) {
+            tiersData = [
+                { id: genId(), label: "S", colorIndex: 0, items: [] },
+                { id: genId(), label: "A", colorIndex: 1, items: [] },
+                { id: genId(), label: "B", colorIndex: 2, items: [] },
+                { id: genId(), label: "C", colorIndex: 3, items: [] },
+                { id: genId(), label: "D", colorIndex: 4, items: [] }
+            ];
+            tierlistNameInput.value = "Новый тир-лист";
+            renderFull();
+        }
+    }
+    
+    function bindEvents() {
+        downloadPngBtn.addEventListener("click", exportAsPNG);
+        resetDefaultBtn.addEventListener("click", resetToExample);
+        addNewTierBtn.addEventListener("click", addNewTier);
+        createNewTierlistBtn.addEventListener("click", createNewTierlist);
+        document.querySelector("label[for='uploadImageInput']").addEventListener("click", () => uploadImageInput.click());
+        uploadImageInput.addEventListener("change", (e) => { if (uploadImageInput.files.length) addImagesToLibrary(uploadImageInput.files); uploadImageInput.value = ""; });
+    }
+    
+    resetToExample();
+    bindEvents();
+    renderFull();
+</script>
+</body>
+</html>
